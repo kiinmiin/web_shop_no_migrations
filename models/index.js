@@ -1,42 +1,35 @@
-const path = require('path');
-const fs = require('fs');
-const sequelize = require('../util/db');
-const models = {};
+const Sequelize = require('sequelize');
+const sequelize = new Sequelize('database', 'username', 'password', {
+    host: 'localhost',
+    dialect: 'mysql'
+});
 
-module.exports = (() => {
-    if (!Object.keys(models).length) {
-        const files = fs.readdirSync(__dirname);
-        const excludedFiles = ['.', '..', 'index.js'];
-        
-        for (const fileName of files) {
-            if (!excludedFiles.includes(fileName) && (path.extname(fileName) === '.js')) {
-                const modelFile = require(path.join(__dirname, fileName));
-                models[modelFile.getTableName()] = modelFile; 
-        } 
-    }
-    
-    Object
-        .values(models)
-        .forEach(model => {
-            if (typeof model.associate === 'function') {
-                model.associate(models);
-            } 
-    });
+const Product = require('./product');
+const Order = require('./order');
+const OrderItem = require('./order-items');
+const Cart = require('./cart');
+const CartItem = require('./cart-item');
+const User = require('./user');
 
-    models.sequelize = sequelize;
-    }
+Order.belongsTo(User, { foreignKey: 'userId' });
+User.hasMany(Order, { foreignKey: 'userId' });
 
-models.User = require('./user')
-models.Product = require('./product')
-models.Cart = require('./cart')
-models.CartItem = require('./cart-item')
+Order.hasMany(OrderItem, { foreignKey: 'orderId' });
+OrderItem.belongsTo(Order, { foreignKey: 'orderId' });
 
-models.User.hasMany(models.Product)
-models.Product.belongsTo(models.User, {constraints: true, onDelete: 'CASCADE'})
-models.User.hasOne(models.Cart)
-models.Cart.belongsTo(models.User)
-models.Cart.belongsToMany(models.Product, {through: models.CartItem})
-models.Product.belongsToMany(models.Cart, {through: models.CartItem})
-    
-    return models;
-})();
+OrderItem.belongsTo(Product, { foreignKey: 'productId' });
+Product.hasMany(OrderItem, { foreignKey: 'productId' });
+
+User.hasOne(Cart, { foreignKey: 'userId' });
+Cart.belongsToMany(Product, { through: 'CartItem', foreignKey: 'cartId' });
+
+
+module.exports = {
+    sequelize,
+    Product,
+    Order,
+    OrderItem,
+    Cart,
+    CartItem,
+    User
+};

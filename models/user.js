@@ -1,7 +1,7 @@
 const Sequelize = require('sequelize');
 const sequelize = require('../util/db');
 
-const Product = sequelize.define('user', {
+const User = sequelize.define('user', {
     id: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
@@ -12,4 +12,8 @@ const Product = sequelize.define('user', {
     email: Sequelize.STRING,
 });
 
-module.exports = Product;
+User.associate = (models) => {
+    User.hasOne(models.Cart, { foreignKey: 'userId' });
+};
+
+module.exports = User;

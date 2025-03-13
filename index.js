@@ -19,17 +19,19 @@ app.use((req, res, next) => {
     .catch(err => console.log(err));
 });
 
-const productAdminRoutes = require('./routes/admin/products')
+const orderRoutes = require('./routes/order');
+const productAdminRoutes = require('./routes/admin/products');
 app.use('/admin', productAdminRoutes)
 
 const productRoutes = require('./routes/products')
 app.use(productRoutes)
 
 const shopRoutes = require('./routes/shop')
-app.use(shopRoutes)
+app.use(orderRoutes);
+app.use(shopRoutes);
 
 sequelize
-    .sync({force: true})
+    .sync()
     .then(() => {
         return models.User.findByPk(1)
     })
