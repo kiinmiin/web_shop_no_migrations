@@ -25,8 +25,11 @@ app.use('/admin', productAdminRoutes)
 const productRoutes = require('./routes/products')
 app.use(productRoutes)
 
+const shopRoutes = require('./routes/shop')
+app.use(shopRoutes)
+
 sequelize
-    .sync()
+    .sync({force: true})
     .then(() => {
         return models.User.findByPk(1)
     })
@@ -37,11 +40,14 @@ sequelize
         return user; 
     })
     .then((user) => {
-        console.log(user)
-        app.listen(3005);
+        return user.createCart();
+    })
+    .then((cart) => {
+        console.log(cart)
+        app.listen(3005)
     })
     .catch((error) => {
-        console.log(error)
+        console.log(error);
     }) 
 
 app.get('/', (req, res) => {
